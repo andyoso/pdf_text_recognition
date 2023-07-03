@@ -280,37 +280,6 @@ def object_detection_enterprise(image_enterprise, WEIGHTS_enterprise_pt):
     return result
 
 
-# def object_detection_enterprise(image_enterprise,WEIGHTS_enterprise_pt):
-#     model_enterprise = attempt_load(WEIGHTS_enterprise_pt, map_location=DEVICE)
-#     result = []
-
-#     image_enterprise = image_enterprise.astype('uint8')
-#     image_enterprise = cv2.cvtColor(image_enterprise, cv2.COLOR_BGR2RGB)
-
-#     class_conf = {}
-#     class_suffixes = ['_none', '_none']  # 需要比較的類別組後綴
-
-#     pred1 = predict(image_enterprise, model_enterprise)
-#     for x1, y1, x2, y2, conf, class_id in pred1:
-#         if conf >= conf_threshold:
-#             class_name = CLASSES[int(class_id)]
-#             if class_name == 'Unchecked' or class_name == 'Checked':
-#                 if class_name not in class_conf or conf > class_conf[class_name]:
-#                     class_conf[class_name] = conf
-#             else:
-#                 for suffix in class_suffixes:
-#                     if class_name.endswith(suffix):
-#                         base_class = class_name[: -len(suffix)]
-#                         if base_class not in class_conf or conf > class_conf[base_class]:
-#                             class_conf[base_class] = conf
-#                         break
-#     print(class_conf.items())
-#     for class_name, conf in class_conf.items():
-#         result.append(class_name)
-
-#     return result
-
-
 def object_detection_contractor(image_contractor, WEIGHTS_contractor_pt):
     model_contractor = attempt_load(WEIGHTS_contractor_pt, map_location=DEVICE)
     result = []
@@ -576,7 +545,7 @@ def agree_ai_check(company_id, rep_id, location, agree_file_name, E_status, P_st
                     images = convert_from_path(file_name_path, last_page=1)
                     if images:
                         image = images[0]  # 取得第一頁影像
-                        image_name = '{}.jpg'.format(agree_file_name[:-4])
+                        image_name = '{}.jpg'.format(file_name)
                         output_file_path = os.path.join(
                             temp_folder_name, image_name)
                         image.save(output_file_path, 'JPEG')
@@ -599,7 +568,7 @@ def agree_ai_check(company_id, rep_id, location, agree_file_name, E_status, P_st
                     for page_number in range(page_count):
                         # 設定輸出檔案名稱
                         image_name = '{}_{}.jpg'.format(
-                            agree_file_name[:-4], page_number+1)
+                            file_name, page_number+1)
                         output_file_path = os.path.join(
                             temp_folder_name, image_name)
 
