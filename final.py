@@ -147,7 +147,7 @@ def correct_rotation(image_path, template_path):
     # 將BGR轉換為RGB
     #rotated_image = cv2.cvtColor(rotated_image, cv2.COLOR_BGR2RGB)
 
-    return rotated_image if (90 - 10 <= angle <= 90 + 10) or (180 - 10 <= angle <= 180 + 10) or (270 - 10 <= angle <= 270 + 10) else cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    return rotated_image if (90 - 10 <= angle <= 90 + 10) or (-90 - 10 <= angle <= -90 + 10) or (180 - 10 <= angle <= 180 + 10) or (-180 - 10 <= angle <= -180 + 10) or (270 - 10 <= angle <= 270 + 10) or (-270 - 10 <= angle <= -270 + 10) else cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
 
 def crop_image_bottom_half(img):
