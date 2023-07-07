@@ -443,7 +443,10 @@ for folder in tqdm(folder_list):
                         agree_type = json_.get('agree_type_final') 
                         # 建立新的資料列
                         row = { 'agree_type':agree_type,'folder': folder, 'file': file, 'result': result, 'timestamp': timestamp}
-                        rows.append(row)                     
+                        rows.append(row)
+                else:
+                    row = { 'agree_type':None,'folder': folder, 'file': file, 'result': '授權書類型錯誤，無法確認同不同意', 'timestamp': timestamp}
+                    rows.append(row)                    
             except Exception as e:
                 error_msg = f"[{current_time}] 檔案 {file} 辨識出現錯誤: {e}"
                 logging.error(error_msg)
@@ -464,16 +467,27 @@ filtered_rows = []
 
 
 for folder, group in grouped_df:
+    agree_type_1 = group[group['agree_type'] == '1']['result'].drop_duplicates()
+    agree_type_2 = group[group['agree_type'] == '2']['result'].drop_duplicates()
+
     if (group[(group['agree_type'] == '1') & (group['result'] == 'agree')].any()).all() and (group[(group['agree_type'] == '2') & (group['result'] == 'agree')].any()).all():
         result = '企業同意/負責人同意且通過'
-    elif (group[(group['agree_type'] == '1') & (group['result'] == 'agree')].any()).all() and (group[(group['agree_type'] == '2') & (group['result'] == 'disagree')].any()).all():
-        result = '企業同意/負責人不同意且通過'
     elif (group[(group['agree_type'] == '1') & (group['result'] == 'disagree')].any()).all() and (group[(group['agree_type'] == '2') & (group['result'] == 'agree')].any()).all():
         result = '企業不同意/負責人同意且通過'
+    elif (group[(group['agree_type'] == '1') & (group['result'] == 'agree')].any()).all() and (group[(group['agree_type'] == '2') & (group['result'] == 'disagree')].any()).all():
+        result = '企業同意/負責人不同意且通過'
     elif (group[(group['agree_type'] == '1') & (group['result'] == 'disagree')].any()).all() and (group[(group['agree_type'] == '2') & (group['result'] == 'disagree')].any()).all():
         result = '企業不同意/負責人不同意且通過'
-    elif group['result'].notna().any():
-        result = 'Fail'
+    # elif group['result'].notna().any():
+    #     result = 'Fail'
+    elif agree_type_1.empty and agree_type_2.empty:
+        result = "授權書1結果為:缺少， 授權書2結果為:缺少"
+    elif agree_type_1.empty:
+        result = f"授權書1結果為:缺少， 授權書2結果為: {', '.join(agree_type_2)}"
+    elif agree_type_2.empty:
+        result = f"授權書1結果為:{'、'.join(agree_type_1)}， 授權書2結果為:缺少"
+    elif agree_type_1.notna().any() and agree_type_2.notna().any():
+        result = f"授權書1結果為:{'、'.join(agree_type_1)}， 授權書2結果為:{'、'.join(agree_type_2)}"
     else:
         result = None
 
@@ -559,8 +573,7 @@ for filename in folder_list:
                 elif os.path.isfile(file_path):
                     # 刪除檔案
                     os.remove(file_path)
-            elif filtered_df[filtered_df['pno'].str.contains(filename)]['ai_result'].iloc[0] == 'Fail' :
-
+            else:
                 # 移動資料夾或刪除檔案
                 if os.path.isdir(file_path):
                     os.makedirs(temp_Fail_folder_path, exist_ok=True)
@@ -668,7 +681,7 @@ all_agree_num = len(combine[combine['ai_result'] == '企業同意/負責人同�
 E_agree_P_disagree_num = len(combine[combine['ai_result'] == '企業同意/負責人不同意且通過'])
 E_disagree_P_agree_num = len(combine[combine['ai_result'] == '企業不同意/負責人同意且通過'])
 all_disagree_num = len(combine[combine['ai_result'] == '企業不同意/負責人不同意且通過'])
-Fail_num = len(combine[combine['ai_result'] == 'Fail'])
+Fail_num = len(combine[~combine['ai_result'].isin(['企業同意/負責人同意且通過', '企業同意/負責人不同意且通過', '企業不同意/負責人同意且通過', '企業不同意/負責人不同意且通過'])])
 wait_to_check_num = len(combine[combine['_merge'] == 'left_only'])
 
 msg = f"\n總案件:{total_num}\n-企業同意/負責人同意且通過案件數:{all_agree_num}\n-企業不同意/負責人同意且通過案件數:{E_disagree_P_agree_num}\n-企業同意/負責人不同意且通過案件數:{E_agree_P_disagree_num}\n-企業不同意/負責人不同意且通過案件數:{all_disagree_num}\n-失敗案件數:{Fail_num}\n-等待人工審核案件數:{wait_to_check_num}"

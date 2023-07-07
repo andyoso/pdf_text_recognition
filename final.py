@@ -150,6 +150,7 @@ def correct_rotation(image_path, template_path):
     return rotated_image if (90 - 10 <= angle <= 90 + 10) or (-90 - 10 <= angle <= -90 + 10) or (180 - 10 <= angle <= 180 + 10) or (-180 - 10 <= angle <= -180 + 10) or (270 - 10 <= angle <= 270 + 10) or (-270 - 10 <= angle <= -270 + 10) else cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
 
+
 def crop_image_bottom_half(img):
     #img = cv2.imread(image_path)
     height, width = img.shape[:2]
@@ -393,13 +394,56 @@ def recognition_all(IMAGE_FILE, company_id, rep_id, E_status, P_status, rotate_i
             values = enterprise_output_result.values()
             if all(value == -1 or value == 0 for value in values if isinstance(value, (int, float))):
                 enterprise_output_result["status_code"] = "10003"
-                enterprise_output_result["message"] = "All items error, please upload again"
+                enterprise_output_result["message"] = "授權書類型錯誤或全部未填寫"
                 # 保存錯誤的圖片
                 save_error_image(crop_img, IMAGE_FILE, folder_name="all_error")
                 return enterprise_output_result
             elif any(value == -1 or value == 0 for value in values if isinstance(value, (int, float))):
+                status_string = ""
+                count_unrecognized = 0 # 未偵測次數計算
+                for key, value in enterprise_output_result.items():
+                    if  key == "ocr_agree_check": 
+                        if value == 0:
+                            status_string += "未勾選同意/"
+                        elif value == -1:
+                            status_string += "未偵測勾選同意/"
+                            count_unrecognized += 1
+                    elif key == "ocr_big_seal":
+                        if value == 0:
+                            status_string += "未蓋大章/"
+                        elif value == -1:
+                            status_string += "未偵測蓋大章/"
+                            count_unrecognized += 1
+                    elif key == "ocr_small_seal":
+                        if value == 0:
+                            status_string += "未蓋小章/"
+                        elif value == -1:
+                            status_string += "未偵測蓋小章/"
+                            count_unrecognized += 1
+                    elif key == "ocr_comp_id_check":
+                        if value == 0:
+                            status_string += "未填寫統一編號/"
+                        elif value == -1:
+                            status_string += "未偵測填寫統一編號/"
+                            count_unrecognized += 1
+                    elif key == "ocr_comp_name":
+                        if value == 0:
+                            status_string += "未填寫立書人(公司名)/"
+                        elif value == -1:
+                            status_string += "未偵測填寫立書人(公司名)/"
+                            count_unrecognized += 1
+                    elif key == "ocr_rep_name":
+                        if value == 0:
+                            status_string += "未填寫代表人/"
+                        elif value == -1:
+                            status_string += "未偵測填寫代表人/"
+                            count_unrecognized += 1
+                if count_unrecognized >= 3:
+                    status_string = "模型偵測異常，請確認授權書是否有誤"
+                # 移除最後一個斜線
+                status_string = status_string.rstrip('/')
                 enterprise_output_result["status_code"] = "10004"
-                enterprise_output_result["message"] = "Partial items error, please check manually"
+                enterprise_output_result["message"] = status_string
                 # 保存錯誤的圖片
                 save_error_image(crop_img, IMAGE_FILE,
                                  folder_name="partial_error")
@@ -420,9 +464,9 @@ def recognition_all(IMAGE_FILE, company_id, rep_id, E_status, P_status, rotate_i
             if "Checked" in disagree_result:
                 return {"agree_type_final": "1", "message": "disagree"}
             else:
-                return {"disagree Partial items error, please check manually"}
+                return {"「企業授權書」不同意授權未打勾"}
         else:
-            return {"E_status file name error, please check manually"}
+            return {"企業授權書檔名命名錯誤"}
     elif classification(IMAGE_FILE, type_recognition_pth)[0] == 'contractor' and classification(IMAGE_FILE, type_recognition_pth)[1] > 0.9:
         if P_status == 1:
             # # 對照範例樣本有歪斜會自動翻轉
@@ -464,13 +508,56 @@ def recognition_all(IMAGE_FILE, company_id, rep_id, E_status, P_status, rotate_i
             values = contractor_output_result.values()
             if all(value == -1 or value == 0 for value in values if isinstance(value, (int, float))):
                 contractor_output_result["status_code"] = "10003"
-                contractor_output_result["message"] = "All items error, please upload again"
+                contractor_output_result["message"] = "授權書類型錯誤或全部未填寫"
                 # 保存錯誤的圖片
                 save_error_image(crop_img, IMAGE_FILE, folder_name="all_error")
                 return contractor_output_result
             elif any(value == -1 or value == 0 for value in values if isinstance(value, (int, float))):
+                status_string = ""
+                count_unrecognized = 0 # 未偵測次數計算
+                for key, value in contractor_output_result.items():
+                    if  key == "ocr_agree_check": 
+                        if value == 0:
+                            status_string += "未勾選同意"
+                        elif value == -1:
+                            status_string += "未偵測勾選同意"
+                            count_unrecognized += 1
+                    elif key == "ocr_rep_seal":
+                        if value == 0:
+                            status_string += "未蓋負責人印章"
+                        elif value == -1:
+                            status_string += "未偵測負責人印章"
+                            count_unrecognized += 1
+                    elif key == "ocr_comp_id_check":
+                        if value == 0:
+                            status_string += "未填寫統一編號"
+                        elif value == -1:
+                            status_string += "未偵測填寫統一編號"
+                            count_unrecognized += 1
+                    elif key == "ocr_comp_name":
+                        if value == 0:
+                            status_string += "未填寫公司/行號名稱"
+                        elif value == -1:
+                            status_string += "未偵測填寫公司/行號名稱"
+                            count_unrecognized += 1
+                    elif key == "ocr_rep_name":
+                        if value == 0:
+                            status_string += "未填寫立書人(企業負責人)"
+                        elif value == -1:
+                            status_string += "未偵測填寫立書人(企業負責人)"
+                            count_unrecognized += 1
+                    elif key == "ocr_rep_id_check":
+                        if value == 0:
+                            status_string += "未填寫身分證字號"
+                        elif value == -1:
+                            status_string += "未偵測填寫身分證字號"
+                            count_unrecognized += 1
+                if count_unrecognized >= 3:
+                    status_string = "模型偵測異常，請確認授權書是否有誤"
+                # 移除最後一個斜線
+                status_string = status_string.rstrip('/')
                 contractor_output_result["status_code"] = "10004"
-                contractor_output_result["message"] = "Partial items error, please check manually"
+                contractor_output_result["message"] = status_string
                 # 保存錯誤的圖片
                 save_error_image(crop_img, IMAGE_FILE,
                                  folder_name="partial_error")
@@ -492,15 +579,15 @@ def recognition_all(IMAGE_FILE, company_id, rep_id, E_status, P_status, rotate_i
             if "Checked" in disagree_result:
                 return {"agree_type_final": "2", "message": "disagree"}
             else:
-                return {"disagree Partial items error, please check manually"}
+                return {"「負責人授權書」不同意授權未打勾"}
         else:
-            return {"P_status file name error, please check manually"}
+            return {"負責人授權書檔名命名錯誤"}
     else:
         # 將錯誤訊息寫入 log 檔
         logging.error("[%s] 授權書類型錯誤" % current_time)
         # 保存錯誤的圖片
         return {"status_code": "10002",
-                "message": "Agree type error",
+                "message": "授權書類型錯誤，完全無法判讀",
                 "agree_type_final": None}
 
 
