@@ -150,7 +150,6 @@ def correct_rotation(image_path, template_path):
     return rotated_image if (90 - 10 <= angle <= 90 + 10) or (-90 - 10 <= angle <= -90 + 10) or (180 - 10 <= angle <= 180 + 10) or (-180 - 10 <= angle <= -180 + 10) or (270 - 10 <= angle <= 270 + 10) or (-270 - 10 <= angle <= -270 + 10) else cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
 
-
 def crop_image_bottom_half(img):
     #img = cv2.imread(image_path)
     height, width = img.shape[:2]
@@ -176,6 +175,7 @@ def save_error_image(image, IMAGE_FILE, folder_name):
     error_image_path = os.path.join(error_images_dir, error_image_name)
     # print('check',error_image_path)
     # 儲存錯誤的圖片
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
     cv2.imwrite(error_image_path, image)
     print(f"Saved error image: {error_image_path}")
     logging.error("[%s] Saved error image: %s" %
@@ -400,9 +400,9 @@ def recognition_all(IMAGE_FILE, company_id, rep_id, E_status, P_status, rotate_i
                 return enterprise_output_result
             elif any(value == -1 or value == 0 for value in values if isinstance(value, (int, float))):
                 status_string = ""
-                count_unrecognized = 0 # 未偵測次數計算
+                count_unrecognized = 0  # 未偵測次數計算
                 for key, value in enterprise_output_result.items():
-                    if  key == "ocr_agree_check": 
+                    if key == "ocr_agree_check":
                         if value == 0:
                             status_string += "未勾選同意/"
                         elif value == -1:
@@ -514,9 +514,9 @@ def recognition_all(IMAGE_FILE, company_id, rep_id, E_status, P_status, rotate_i
                 return contractor_output_result
             elif any(value == -1 or value == 0 for value in values if isinstance(value, (int, float))):
                 status_string = ""
-                count_unrecognized = 0 # 未偵測次數計算
+                count_unrecognized = 0  # 未偵測次數計算
                 for key, value in contractor_output_result.items():
-                    if  key == "ocr_agree_check": 
+                    if key == "ocr_agree_check":
                         if value == 0:
                             status_string += "未勾選同意"
                         elif value == -1:
