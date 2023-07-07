@@ -505,8 +505,12 @@ filtered_df = filtered_df[['pno', 'ai_result', 'update_dt']].drop_duplicates()
 
 print("result:")
 logger.info("result:")
+
+
 print(filtered_df)
+
 logger.info(filtered_df)
+filtered_df.to_csv('模型辨識不通過原因.csv', mode='a', index=False)
 
 
 
@@ -681,8 +685,8 @@ all_agree_num = len(combine[combine['ai_result'] == '企業同意/負責人同�
 E_agree_P_disagree_num = len(combine[combine['ai_result'] == '企業同意/負責人不同意且通過'])
 E_disagree_P_agree_num = len(combine[combine['ai_result'] == '企業不同意/負責人同意且通過'])
 all_disagree_num = len(combine[combine['ai_result'] == '企業不同意/負責人不同意且通過'])
-Fail_num = len(combine[~combine['ai_result'].isin(['企業同意/負責人同意且通過', '企業同意/負責人不同意且通過', '企業不同意/負責人同意且通過', '企業不同意/負責人不同意且通過'])])
 wait_to_check_num = len(combine[combine['_merge'] == 'left_only'])
+Fail_num = len(combine[~combine['ai_result'].isin(['企業同意/負責人同意且通過', '企業同意/負責人不同意且通過', '企業不同意/負責人同意且通過', '企業不同意/負責人不同意且通過'])]) - wait_to_check_num
 
 msg = f"\n總案件:{total_num}\n-企業同意/負責人同意且通過案件數:{all_agree_num}\n-企業不同意/負責人同意且通過案件數:{E_disagree_P_agree_num}\n-企業同意/負責人不同意且通過案件數:{E_agree_P_disagree_num}\n-企業不同意/負責人不同意且通過案件數:{all_disagree_num}\n-失敗案件數:{Fail_num}\n-等待人工審核案件數:{wait_to_check_num}"
 logger.info(msg)
