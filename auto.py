@@ -459,7 +459,7 @@ for folder in tqdm(folder_list):
         df = df.append(row, ignore_index=True)
 
 print(df)
-
+df.to_csv('部授權書_模型辨識不通過原因.csv', mode='a', index=False)
 logger.info(df)
 # group by 同一個 folder 名稱下的 result 
 grouped_df = df.groupby('folder')
@@ -510,7 +510,7 @@ logger.info("result:")
 print(filtered_df)
 
 logger.info(filtered_df)
-filtered_df.to_csv('模型辨識不通過原因.csv', mode='a', index=False)
+filtered_df.to_csv('統整_模型辨識不通過原因.csv', mode='a', index=False)
 
 
 
