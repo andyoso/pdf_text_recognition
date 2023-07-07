@@ -253,7 +253,7 @@ def object_detection_enterprise(image_enterprise, WEIGHTS_enterprise_pt):
     #image_enterprise = cv2.imread(IMAGE_FILE_enterprise)
     image_enterprise = image_enterprise.astype('uint8')
     # 將圖片轉換為RGB通道順序
-    image_enterprise = cv2.cvtColor(image_enterprise, cv2.COLOR_BGR2RGB)
+    #image_enterprise = cv2.cvtColor(image_enterprise, cv2.COLOR_BGR2RGB)
     # 偵測結果
     pred1 = predict(image_enterprise, model_enterprise)
     max_conf = {}
@@ -289,7 +289,7 @@ def object_detection_contractor(image_contractor, WEIGHTS_contractor_pt):
     #image_contractor = cv2.imread(IMAGE_FILE_contractor)
     image_contractor = image_contractor.astype('uint8')
     # 將圖片轉換為RGB通道順序
-    image_contractor = cv2.cvtColor(image_contractor, cv2.COLOR_BGR2RGB)
+    #image_contractor = cv2.cvtColor(image_contractor, cv2.COLOR_BGR2RGB)
     # 偵測結果
     pred1 = predict(image_contractor, model_contractor)
     max_conf = {}
