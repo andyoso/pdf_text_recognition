@@ -1,3 +1,10 @@
+from concurrent.futures import ThreadPoolExecutor
+from tqdm import tqdm
+from PyPDF2 import PdfReader
+import time
+import sys
+from datetime import datetime, timedelta
+from final import agree_ai_check
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -11,7 +18,7 @@ import logging
 
 # 創建一個logger
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG) # 設定最低日誌等級為DEBUG，這樣所有等級的日誌都能被捕捉到
+logger.setLevel(logging.DEBUG)  # 設定最低日誌等級為DEBUG，這樣所有等級的日誌都能被捕捉到
 
 # 創建一個處理器，寫入INFO及以上等級的日誌到info.log檔案
 info_handler = logging.FileHandler('auto.log')
@@ -33,23 +40,21 @@ logger.addHandler(info_handler)
 logger.addHandler(error_handler)
 
 
-
 def login():
     chrome = webdriver.Chrome()
     chrome.get("https://0800056476.sme.gov.tw/smeloans/tele_credit/login.php")
-    
+
     cookie_name = 'PHPSESSID'  # 將 'some_cookie' 替換成你想要獲取的cookie的名稱
     cookie = chrome.get_cookie(cookie_name)
     cookie = cookie['value']
 
-    
     # 定位到img標籤
-    img_tag = chrome.find_element(By.XPATH, '//img[contains(@src, "checkCode.php")]')
+    img_tag = chrome.find_element(
+        By.XPATH, '//img[contains(@src, "checkCode.php")]')
     # 獲得src屬性的值
     img_src = img_tag.get_attribute('src')
     # 從src中抽取你需要的數字
     num = img_src.split('=')[1]
-    
 
     # 找到帳號輸入框並輸入帳號
     username = chrome.find_element(By.XPATH, '//*[@id="inputEmail3"]')
@@ -67,9 +72,9 @@ def login():
     checkcode.clear()
     checkcode.send_keys(num)
 
-
     # 點擊登入按鈕
-    login_button = chrome.find_element(By.XPATH,'//button[normalize-space()="登入"]')
+    login_button = chrome.find_element(
+        By.XPATH, '//button[normalize-space()="登入"]')
     login_button.click()
 #     chrome.close()
     print("登入成功")
@@ -77,9 +82,8 @@ def login():
     return cookie
 
 
-
 def snd_line(message):
-    
+
     headers = {
         "Authorization": "Bearer " + "3nybyrnsybWvlg7G7h18A0dyJgXFytlVpr2GRXY0evc",
         "Content-Type": "application/x-www-form-urlencoded"
@@ -89,10 +93,8 @@ def snd_line(message):
 
     r = requests.post("https://notify-api.line.me/api/notify",
                       headers=headers, params=params)
-    print(r.status_code)  #200
+    print(r.status_code)  # 200
 
-    
-    
 
 cookie = login()
 
@@ -119,7 +121,6 @@ cookies = {
 }
 
 
-
 try:
     response = requests.get(url, headers=headers, cookies=cookies)
 except Exception as e:
@@ -135,22 +136,23 @@ except Exception as e:
 soup = BeautifulSoup(response.text, 'html.parser')
 
 # Extract all "a" tags with "href" attribute
-links = [a.get('href') for a in soup.find_all('a', href=True) if '_umemberp' in a.get('href')]
+links = [a.get('href') for a in soup.find_all(
+    'a', href=True) if '_umemberp' in a.get('href')]
 
 
-## 驗證是否需要重新登入
+# 驗證是否需要重新登入
 try:
     scripts = soup.find_all('script')
     for script in scripts:
         if '無觀看權限!!' in script.string:
             print(script.string)
-            snd_line("連線中斷，請重新登入\nhttps://0800056476.sme.gov.tw/smeloans/tele_credit/login.php")
+            snd_line(
+                "連線中斷，請重新登入\nhttps://0800056476.sme.gov.tw/smeloans/tele_credit/login.php")
 except Exception as e:
     print(e)
     logger.info(e)
 
-        
-        
+
 # 找到所有的<a>標籤
 tmp_links = soup.find_all('a')
 send_param = ""
@@ -165,20 +167,21 @@ for link in tmp_links:
             logger.info(send_param)
 
             break
-            
+
 link_df = pd.DataFrame()
 link_df['link'] = links
-link_df['case_id'] = link_df['link'].apply(lambda x: x.split("/fs")[1].split("_")[0] if "/fs" in x and "_" in x else None)
+link_df['case_id'] = link_df['link'].apply(lambda x: x.split(
+    "/fs")[1].split("_")[0] if "/fs" in x and "_" in x else None)
 # link_df['ent_or_rep'] = link_df['link'].apply(lambda x: x.split(".pdf")[0].split("-")[1] if "-" in x and ".pdf" in x else None)
-link_df['ent_or_rep'] = link_df['link'].apply(lambda x: x.split(".pdf")[0].split("-")[1] if "-" in x and ".pdf" in x 
-                                              else x.split(".jpeg")[0].split("-")[1] if "-" in x and ".jpeg" in x 
-                                              else x.split(".jpg")[0].split("-")[1] if "-" in x and ".jpg" in x 
-                                              else x.split(".png")[0].split("-")[1] if "-" in x and ".png" in x 
-                                              else x.split(".tif")[0].split("-")[1] if "-" in x and ".tif" in x 
-                                              else x.split(".tiff")[0].split("-")[1] if "-" in x and ".tiff" in x 
+link_df['ent_or_rep'] = link_df['link'].apply(lambda x: x.split(".pdf")[0].split("-")[1] if "-" in x and ".pdf" in x
+                                              else x.split(".jpeg")[0].split("-")[1] if "-" in x and ".jpeg" in x
+                                              else x.split(".jpg")[0].split("-")[1] if "-" in x and ".jpg" in x
+                                              else x.split(".png")[0].split("-")[1] if "-" in x and ".png" in x
+                                              else x.split(".tif")[0].split("-")[1] if "-" in x and ".tif" in x
+                                              else x.split(".tiff")[0].split("-")[1] if "-" in x and ".tiff" in x
                                               else None)
-link_df['file'] = link_df['link'].apply(lambda x: x.split("/")[1] if "/" in x  else None)
-
+link_df['file'] = link_df['link'].apply(
+    lambda x: x.split("/")[1] if "/" in x else None)
 
 
 # df = pd.read_html(response.text)
@@ -193,7 +196,8 @@ dfs
 unique_ent_or_rep = link_df.groupby('case_id')['ent_or_rep'].unique()
 
 # 過濾出 'ent_or_rep' 同時包含 1 和 2 的 'case_id'
-filtered_cases = unique_ent_or_rep[unique_ent_or_rep.apply(lambda x: set(x) == {'1', '2'})]
+filtered_cases = unique_ent_or_rep[unique_ent_or_rep.apply(
+    lambda x: set(x) == {'1', '2'})]
 
 # 取出符合條件的 'case_id'
 case_ids = filtered_cases.index.tolist()
@@ -201,11 +205,8 @@ case_ids = filtered_cases.index.tolist()
 two_file_case_list = link_df[link_df['case_id'].isin(case_ids)]
 
 
+def download_file(case_id, file_url, file_name):
 
-
-def download_file(case_id,file_url,file_name):
-    
-    
     # 資料夾名稱
     folder_name = case_id
     folder_name = 'datasets\\temp\\'+folder_name
@@ -213,8 +214,7 @@ def download_file(case_id,file_url,file_name):
     if not os.path.exists(folder_name):
         # 創建資料夾
         os.makedirs(folder_name)
-        
-        
+
     main_url = 'https://0800056476.sme.gov.tw/smeloans/tele_credit/'
     download_url = main_url + file_url
 
@@ -233,33 +233,17 @@ def download_file(case_id,file_url,file_name):
         logger.info(f"Failed to download file :{download_url}")
 
 #         snd_line(f"Failed to download file :{download_url}")
-        
-        
+
+
 shutil.rmtree(r'datasets/temp')
 
 print("下載檔案..")
 
-two_file_case_list.apply(lambda row: download_file(row['case_id'], row['link'], row['file']), axis=1)
-
+two_file_case_list.apply(lambda row: download_file(
+    row['case_id'], row['link'], row['file']), axis=1)
 
 
 print("跑AI辨識..")
-
-from final import agree_ai_check
-import pandas as pd
-import os
-from datetime import datetime, timedelta
-import sys
-from final import agree_ai_check
-import pandas as pd
-import os
-from datetime import datetime, timedelta
-import sys
-import time
-import logging
-import shutil
-from PyPDF2 import PdfReader
-
 
 
 # 設定 log 檔
@@ -268,7 +252,7 @@ from PyPDF2 import PdfReader
 current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # 從外部傳入資料夾路徑
-# folder_path = sys.argv[1]  
+# folder_path = sys.argv[1]
 folder_path = r'datasets\temp'
 
 # 檢查資料夾是否存在，若不存在則創建資料夾
@@ -286,23 +270,12 @@ if len(os.listdir(folder_path)) == 0:
     sys.exit()
 
 
-
-
-
 # 列出本機路徑下的資料夾
 folder_list = os.listdir(folder_path)
 
 
-
 df = pd.DataFrame(columns=['folder', 'file', 'result', 'timestamp'])
 timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-
-
-
-
-from tqdm import tqdm
-
-
 
 
 all_file_list = []
@@ -311,7 +284,7 @@ all_agree_folder_path = 'datasets\\all_agree'
 # 檢查資料夾是否存在，若不存在則創建資料夾
 if not os.path.exists(all_agree_folder_path):
     os.makedirs(all_agree_folder_path)
-    
+
 all_agree_folder_list = os.listdir(all_agree_folder_path)
 for subfolder in all_agree_folder_list:
     subfolder_path = os.path.join(all_agree_folder_path, subfolder)
@@ -387,24 +360,25 @@ for folder in tqdm(folder_list):
     files_list = os.listdir(folder_full_path)  # 資料夾內的所有檔案
     if len(files_list) > 0:
         rows = []
-        for file in tqdm(files_list, leave=False):  # 給內層的loop也加上進度條，使用leave=False讓內層的進度條在完成後消失
+        # 給內層的loop也加上進度條，使用leave=False讓內層的進度條在完成後消失
+        for file in tqdm(files_list, leave=False):
             file_path = os.path.join(folder_full_path, file)  # 檔案的完整路徑
             # 使用 os.path.splitext() 函式來取得檔案的副檔名 & 檔名
-            file_extension = os.path.splitext(file_path)[1] 
+            file_extension = os.path.splitext(file_path)[1]
             file_name = os.path.splitext(file)[0]
-            
+
             try:
                 match = re.search(r"_(\d)_(\d)", file_name)
                 if match:
-                    E_status = int( match.group(1) )
-                    P_status = int( match.group(2) )
+                    E_status = int(match.group(1))
+                    P_status = int(match.group(2))
                 else:
                     raise ValueError("無法從檔名中找到授權書同意與否狀態")
             except Exception as e:
                 error_msg = f"[{current_time}] 檔案 {file} 檔名錯誤: {e}"
                 logging.error(error_msg)
                 continue
-            # 讀取檔案並執行 agree_ai_check 函式            
+            # 讀取檔案並執行 agree_ai_check 函式
             try:
                 # pdf檔案內有多頁的情況
                 if file_extension == ".pdf":
@@ -412,41 +386,47 @@ for folder in tqdm(folder_list):
                     with open(file_path, "rb") as file_:
                         pdf_reader = PdfReader(file_)
                         page_count = len(pdf_reader.pages)  # 獲取頁數
-                    #單頁情況 用檔名判斷用哪個模型
-                    if page_count == 1: 
+                    # 單頁情況 用檔名判斷用哪個模型
+                    if page_count == 1:
                         try:
-                            json_result = agree_ai_check(company_id="123", rep_id="123", location=folder_full_path, agree_file_name=file,E_status=E_status,P_status=P_status)
+                            json_result = agree_ai_check(
+                                company_id="123", rep_id="123", location=folder_full_path, agree_file_name=file, E_status=E_status, P_status=P_status)
                         except Exception as e:
                             print(e)
-                    #多頁情況 用分類模型判斷用哪個模型
+                    # 多頁情況 用分類模型判斷用哪個模型
                     elif page_count > 1:
                         try:
-                            json_result = agree_ai_check(company_id="123", rep_id="123", location=folder_full_path, agree_file_name=file,E_status=E_status,P_status=P_status) #獲得一個list檔案 裡面是多個json結果
+                            json_result = agree_ai_check(company_id="123", rep_id="123", location=folder_full_path,
+                                                         agree_file_name=file, E_status=E_status, P_status=P_status)  # 獲得一個list檔案 裡面是多個json結果
                         except Exception as e:
-                            print(e)  
+                            print(e)
                 # 不是PDF檔的情況
-                else: 
+                else:
                     try:
-                        json_result = agree_ai_check(company_id="123", rep_id="123", location=folder_full_path, agree_file_name=file,E_status=E_status,P_status=P_status)
+                        json_result = agree_ai_check(
+                            company_id="123", rep_id="123", location=folder_full_path, agree_file_name=file, E_status=E_status, P_status=P_status)
                     except Exception as e:
                         print(e)
                 if isinstance(json_result, dict):
                     # 提取相關資訊
                     result = json_result.get('message')
-                    agree_type = json_result.get('agree_type_final') 
+                    agree_type = json_result.get('agree_type_final')
                     # 建立新的資料列
-                    row = { 'agree_type':agree_type,'folder': folder, 'file': file, 'result': result, 'timestamp': timestamp}
+                    row = {'agree_type': agree_type, 'folder': folder,
+                           'file': file, 'result': result, 'timestamp': timestamp}
                     rows.append(row)
                 elif isinstance(json_result, list):
                     for json_ in json_result:
                         result = json_.get('message')
-                        agree_type = json_.get('agree_type_final') 
+                        agree_type = json_.get('agree_type_final')
                         # 建立新的資料列
-                        row = { 'agree_type':agree_type,'folder': folder, 'file': file, 'result': result, 'timestamp': timestamp}
+                        row = {'agree_type': agree_type, 'folder': folder,
+                               'file': file, 'result': result, 'timestamp': timestamp}
                         rows.append(row)
                 else:
-                    row = { 'agree_type':None,'folder': folder, 'file': file, 'result': '授權書類型錯誤，無法確認同不同意', 'timestamp': timestamp}
-                    rows.append(row)                    
+                    row = {'agree_type': None, 'folder': folder, 'file': file,
+                           'result': '授權書類型錯誤，無法確認同不同意', 'timestamp': timestamp}
+                    rows.append(row)
             except Exception as e:
                 error_msg = f"[{current_time}] 檔案 {file} 辨識出現錯誤: {e}"
                 logging.error(error_msg)
@@ -455,20 +435,24 @@ for folder in tqdm(folder_list):
         df = df.append(rows, ignore_index=True)
     else:
         # 資料夾內沒有檔案，僅保留時間戳記的資料列
-        row = {'agree_type':None, 'folder': folder, 'file': None, 'result': None, 'timestamp': timestamp}
+        row = {'agree_type': None, 'folder': folder,
+               'file': None, 'result': None, 'timestamp': timestamp}
         df = df.append(row, ignore_index=True)
 
 print(df)
-df.to_csv('部授權書_模型辨識不通過原因.csv', mode='a', index=False)
+df = df[~df['result'].isin(['agree', 'disagree'])]
+df.to_csv('全部授權書_模型辨識不通過原因.csv', mode='a', index=False)
 logger.info(df)
-# group by 同一個 folder 名稱下的 result 
+# group by 同一個 folder 名稱下的 result
 grouped_df = df.groupby('folder')
 filtered_rows = []
 
 
 for folder, group in grouped_df:
-    agree_type_1 = group[group['agree_type'] == '1']['result'].drop_duplicates()
-    agree_type_2 = group[group['agree_type'] == '2']['result'].drop_duplicates()
+    agree_type_1 = group[group['agree_type']
+                         == '1']['result'].drop_duplicates()
+    agree_type_2 = group[group['agree_type']
+                         == '2']['result'].drop_duplicates()
 
     if (group[(group['agree_type'] == '1') & (group['result'] == 'agree')].any()).all() and (group[(group['agree_type'] == '2') & (group['result'] == 'agree')].any()).all():
         result = '企業同意/負責人同意且通過'
@@ -491,13 +475,11 @@ for folder, group in grouped_df:
     else:
         result = None
 
-
-
     timestamp = group['timestamp'].iloc[0]  # 使用第一筆資料的 timestamp
-    filtered_rows.append({'pno': folder, 'ai_result': result, 'update_dt': timestamp})
-   
-    
-    
+    filtered_rows.append(
+        {'pno': folder, 'ai_result': result, 'update_dt': timestamp})
+
+
 # 建立新的 DataFrame
 filtered_df = pd.DataFrame(filtered_rows)
 
@@ -510,9 +492,9 @@ logger.info("result:")
 print(filtered_df)
 
 logger.info(filtered_df)
-filtered_df.to_csv('統整_模型辨識不通過原因.csv', mode='a', index=False)
-
-
+filtered_df = filtered_df[~filtered_df['result'].isin(
+    ['企業同意/負責人同意且通過', '企業不同意/負責人同意且通過', '企業同意/負責人不同意且通過', '企業不同意/負責人不同意且通過'])]
+filtered_df.to_csv('統整授權書_模型辨識不通過原因.csv', mode='a', index=False)
 
 
 current_time = datetime.now()
@@ -522,19 +504,22 @@ formatted_time = current_time.strftime("%Y-%m-%d")  # 把":"換成"-"，因為":
 # 指定暫存資料夾的路徑
 # temp_fail_folder_path = f'datasets\\fail\\{formatted_time}'
 # temp_succeed_folder_path = f'datasets\\succeed\\{formatted_time}'
-temp_all_agree_folder_path = f'datasets/all_agree/{formatted_time}' #全同意
-temp_E_agree_P_disagree_folder_path = f'datasets/E_agree_P_disagree/{formatted_time}' # 企業同意 負責人不同意
-temp_E_disagree_P_agree_folder_path = f'datasets/E_disagree_P_agree/{formatted_time}' # 企業不同意 負責人同意
-temp_all_disagree_folder_path = f'datasets/all_disagree/{formatted_time}' #全不同意
-temp_Fail_folder_path = f'datasets/Fail/{formatted_time}' # 人工審核
+temp_all_agree_folder_path = f'datasets/all_agree/{formatted_time}'  # 全同意
+# 企業同意 負責人不同意
+temp_E_agree_P_disagree_folder_path = f'datasets/E_agree_P_disagree/{formatted_time}'
+# 企業不同意 負責人同意
+temp_E_disagree_P_agree_folder_path = f'datasets/E_disagree_P_agree/{formatted_time}'
+# 全不同意
+temp_all_disagree_folder_path = f'datasets/all_disagree/{formatted_time}'
+temp_Fail_folder_path = f'datasets/Fail/{formatted_time}'  # 人工審核
 
 for filename in folder_list:
     file_path = os.path.join(folder_path, filename)
-    
-    try: 
-        if len(filtered_df[filtered_df['pno'].str.contains(filename)]) > 0 :
 
-            if filtered_df[filtered_df['pno'].str.contains(filename)]['ai_result'].iloc[0] == '企業同意/負責人同意且通過' :
+    try:
+        if len(filtered_df[filtered_df['pno'].str.contains(filename)]) > 0:
+
+            if filtered_df[filtered_df['pno'].str.contains(filename)]['ai_result'].iloc[0] == '企業同意/負責人同意且通過':
 
                 # 移動資料夾或刪除檔案
                 if os.path.isdir(file_path):
@@ -545,29 +530,31 @@ for filename in folder_list:
                 elif os.path.isfile(file_path):
                     # 刪除檔案
                     os.remove(file_path)
-            elif filtered_df[filtered_df['pno'].str.contains(filename)]['ai_result'].iloc[0] == '企業同意/負責人不同意且通過' :
+            elif filtered_df[filtered_df['pno'].str.contains(filename)]['ai_result'].iloc[0] == '企業同意/負責人不同意且通過':
 
                 # 移動資料夾或刪除檔案
                 if os.path.isdir(file_path):
-                    os.makedirs(temp_E_agree_P_disagree_folder_path, exist_ok=True)
+                    os.makedirs(
+                        temp_E_agree_P_disagree_folder_path, exist_ok=True)
                     # 移動資料夾至暫存資料夾
                     shutil.move(file_path, temp_E_agree_P_disagree_folder_path)
                 elif os.path.isfile(file_path):
                     # 刪除檔案
                     os.remove(file_path)
 
-            elif filtered_df[filtered_df['pno'].str.contains(filename)]['ai_result'].iloc[0] == '企業不同意/負責人同意且通過' :
+            elif filtered_df[filtered_df['pno'].str.contains(filename)]['ai_result'].iloc[0] == '企業不同意/負責人同意且通過':
 
                 # 移動資料夾或刪除檔案
                 if os.path.isdir(file_path):
-                    os.makedirs(temp_E_disagree_P_agree_folder_path, exist_ok=True)
+                    os.makedirs(
+                        temp_E_disagree_P_agree_folder_path, exist_ok=True)
                     # 移動資料夾至暫存資料夾
                     shutil.move(file_path, temp_E_disagree_P_agree_folder_path)
                 elif os.path.isfile(file_path):
                     # 刪除檔案
                     os.remove(file_path)
 
-            elif filtered_df[filtered_df['pno'].str.contains(filename)]['ai_result'].iloc[0] == '企業不同意/負責人不同意且通過' :
+            elif filtered_df[filtered_df['pno'].str.contains(filename)]['ai_result'].iloc[0] == '企業不同意/負責人不同意且通過':
 
                 # 移動資料夾或刪除檔案
                 if os.path.isdir(file_path):
@@ -591,11 +578,8 @@ for filename in folder_list:
         logger.error(e)
 
 
-
-
-
-filtered_df.columns = ['案件編號','ai_result','update_dt']
-combine = pd.merge(dfs,filtered_df,on = '案件編號',how = 'outer',indicator = True)
+filtered_df.columns = ['案件編號', 'ai_result', 'update_dt']
+combine = pd.merge(dfs, filtered_df, on='案件編號', how='outer', indicator=True)
 
 
 pd.set_option('display.max_columns', None)
@@ -608,10 +592,14 @@ print(combine)
 logger.info(combine)
 
 # ----------------------- 以下待修改--------------------------------
-submit_list_1 = combine[combine['ai_result'] == '企業同意/負責人同意且通過'].reset_index(drop=True)
-submit_list_2 = combine[combine['ai_result'] == '企業同意/負責人不同意且通過'].reset_index(drop=True)
-submit_list_3 = combine[combine['ai_result'] == '企業不同意/負責人同意且通過'].reset_index(drop=True)
-submit_list_4 = combine[combine['ai_result'] == '企業不同意/負責人不同意且通過'].reset_index(drop=True)
+submit_list_1 = combine[combine['ai_result']
+                        == '企業同意/負責人同意且通過'].reset_index(drop=True)
+submit_list_2 = combine[combine['ai_result']
+                        == '企業同意/負責人不同意且通過'].reset_index(drop=True)
+submit_list_3 = combine[combine['ai_result']
+                        == '企業不同意/負責人同意且通過'].reset_index(drop=True)
+submit_list_4 = combine[combine['ai_result'] ==
+                        '企業不同意/負責人不同意且通過'].reset_index(drop=True)
 print("要送出的清單-企業同意/負責人同意且通過..")
 print(submit_list_1)
 logger.info("要送出的清單-企業同意/負責人同意且通過..")
@@ -634,9 +622,6 @@ logger.info("要送出的清單-企業不同意/負責人不同意且通過..")
 logger.info(submit_list_4)
 print("送出結果..")
 logger.info("送出結果..")
-import requests
-from concurrent.futures import ThreadPoolExecutor
-
 
 
 submit_list_1['send_param'] = send_param
@@ -647,6 +632,7 @@ submit_list_3['send_param'] = send_param
 submit_list_3['ctxt'] = 3
 submit_list_4['send_param'] = send_param
 submit_list_4['ctxt'] = 4
+
 
 def submit(row):
     try:
@@ -659,7 +645,8 @@ def submit(row):
         ctxt = int(row['ctxt'])
 
         main_url2 = 'https://0800056476.sme.gov.tw/smeloans/tele_credit/tele_credit_a2_list.php'
-        x = main_url2 + f'?send={send_param}&pno={pno}&cnumber={cnumber}&branch={branch}&bankcode={bankcode}&status=Y&ctxt={ctxt}'
+        x = main_url2 + \
+            f'?send={send_param}&pno={pno}&cnumber={cnumber}&branch={branch}&bankcode={bankcode}&status=Y&ctxt={ctxt}'
         cookies = {
             'PHPSESSID': cookie,
         }
@@ -669,6 +656,7 @@ def submit(row):
         print(e)
         snd_line(f"送出審核發生錯誤:\n{e}")
 
+
 # 使用ThreadPoolExecutor提交任务
 with ThreadPoolExecutor(max_workers=5) as executor:
     executor.map(submit, submit_list_1.to_dict('records'))
@@ -677,8 +665,7 @@ with ThreadPoolExecutor(max_workers=5) as executor:
     executor.map(submit, submit_list_4.to_dict('records'))
 
 
-
-## line回報
+# line回報
 
 total_num = len(combine)
 all_agree_num = len(combine[combine['ai_result'] == '企業同意/負責人同意且通過'])
@@ -686,11 +673,9 @@ E_agree_P_disagree_num = len(combine[combine['ai_result'] == '企業同意/負�
 E_disagree_P_agree_num = len(combine[combine['ai_result'] == '企業不同意/負責人同意且通過'])
 all_disagree_num = len(combine[combine['ai_result'] == '企業不同意/負責人不同意且通過'])
 wait_to_check_num = len(combine[combine['_merge'] == 'left_only'])
-Fail_num = len(combine[~combine['ai_result'].isin(['企業同意/負責人同意且通過', '企業同意/負責人不同意且通過', '企業不同意/負責人同意且通過', '企業不同意/負責人不同意且通過'])]) - wait_to_check_num
+Fail_num = len(combine[~combine['ai_result'].isin(
+    ['企業同意/負責人同意且通過', '企業同意/負責人不同意且通過', '企業不同意/負責人同意且通過', '企業不同意/負責人不同意且通過'])]) - wait_to_check_num
 
 msg = f"\n總案件:{total_num}\n-企業同意/負責人同意且通過案件數:{all_agree_num}\n-企業不同意/負責人同意且通過案件數:{E_disagree_P_agree_num}\n-企業同意/負責人不同意且通過案件數:{E_agree_P_disagree_num}\n-企業不同意/負責人不同意且通過案件數:{all_disagree_num}\n-失敗案件數:{Fail_num}\n-等待人工審核案件數:{wait_to_check_num}"
 logger.info(msg)
 snd_line(msg)
-
-
-
