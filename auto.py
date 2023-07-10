@@ -447,9 +447,9 @@ if not df.empty:
     if os.path.isfile('全部授權書_模型辨識不通過原因.csv'):
         write_header = False
 
-    df = df[~df['result'].isin(['agree', 'disagree'])]
+    df_fail = df[~df['result'].isin(['agree', 'disagree'])]
 
-    df.to_csv('全部授權書_模型辨識不通過原因.csv', mode='a', index=False, header=write_header, encoding='big5')
+    df_fail.to_csv('全部授權書_模型辨識不通過原因.csv', mode='a', index=False, header=write_header, encoding='big5')
 
 # group by 同一個 folder 名稱下的 result
 grouped_df = df.groupby('folder')
@@ -505,10 +505,10 @@ if not filtered_df.empty:
     if os.path.isfile('統整授權書_模型辨識不通過原因.csv'):
         write_header = False
 
-    filtered_df = filtered_df[~filtered_df['ai_result'].isin(
+    filtered_df_fail = filtered_df[~filtered_df['ai_result'].isin(
         ['企業同意/負責人同意且通過', '企業不同意/負責人同意且通過', '企業同意/負責人不同意且通過', '企業不同意/負責人不同意且通過'])]
 
-    filtered_df.to_csv('統整授權書_模型辨識不通過原因.csv', mode='a', index=False, header=write_header, encoding='big5')
+    filtered_df_fail.to_csv('統整授權書_模型辨識不通過原因.csv', mode='a', index=False, header=write_header, encoding='big5')
 
 current_time = datetime.now()
 formatted_time = current_time.strftime("%Y-%m-%d")  # 把":"換成"-"，因為":"不能作為路徑的一部分
