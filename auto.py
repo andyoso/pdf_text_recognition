@@ -440,9 +440,12 @@ for folder in tqdm(folder_list):
         df = df.append(row, ignore_index=True)
 
 print(df)
-df = df[~df['result'].isin(['agree', 'disagree'])]
-df.to_csv('全部授權書_模型辨識不通過原因.csv', mode='a', index=False)
 logger.info(df)
+
+if not df.empty:
+    df = df[~df['result'].isin(['agree', 'disagree'])]
+    df.to_csv('全部授權書_模型辨識不通過原因.csv', mode='a', index=False)
+
 # group by 同一個 folder 名稱下的 result
 grouped_df = df.groupby('folder')
 filtered_rows = []
@@ -492,10 +495,10 @@ logger.info("result:")
 print(filtered_df)
 
 logger.info(filtered_df)
-filtered_df = filtered_df[~filtered_df['result'].isin(
-    ['企業同意/負責人同意且通過', '企業不同意/負責人同意且通過', '企業同意/負責人不同意且通過', '企業不同意/負責人不同意且通過'])]
-filtered_df.to_csv('統整授權書_模型辨識不通過原因.csv', mode='a', index=False)
-
+if not filtered_df.empty:
+    filtered_df = filtered_df[~filtered_df['ai_result'].isin(
+        ['企業同意/負責人同意且通過', '企業不同意/負責人同意且通過', '企業同意/負責人不同意且通過', '企業不同意/負責人不同意且通過'])]
+    filtered_df.to_csv('統整授權書_模型辨識不通過原因.csv', mode='a', index=False)
 
 current_time = datetime.now()
 formatted_time = current_time.strftime("%Y-%m-%d")  # 把":"換成"-"，因為":"不能作為路徑的一部分
