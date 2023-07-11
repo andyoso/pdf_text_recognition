@@ -353,7 +353,7 @@ def recognition_all(IMAGE_FILE, company_id, rep_id, E_status, P_status, rotate_i
 
     # AI辨識辨識邏輯
     if classification(IMAGE_FILE, type_recognition_pth)[0] == 'enterprise' and classification(IMAGE_FILE, type_recognition_pth)[1] > 0.7:
-    #if classification(IMAGE_FILE, type_recognition_pth)[0] == 'enterprise':
+        # if classification(IMAGE_FILE, type_recognition_pth)[0] == 'enterprise':
         if E_status == 1:
             # # 對照範例樣本有歪斜會自動翻轉
             if rotate_image:
@@ -401,9 +401,9 @@ def recognition_all(IMAGE_FILE, company_id, rep_id, E_status, P_status, rotate_i
                 return enterprise_output_result
             elif any(value == -1 or value == 0 for value in values if isinstance(value, (int, float))):
                 status_string = ""
-                count_unrecognized = 0 # 未偵測次數計算
+                count_unrecognized = 0  # 未偵測次數計算
                 for key, value in enterprise_output_result.items():
-                    if  key == "ocr_agree_check": 
+                    if key == "ocr_agree_check":
                         if value == 0:
                             status_string += "未勾選同意/"
                         elif value == -1:
@@ -468,18 +468,19 @@ def recognition_all(IMAGE_FILE, company_id, rep_id, E_status, P_status, rotate_i
                 # 保存錯誤的圖片
                 save_error_image(crop_img_top, IMAGE_FILE,
                                  folder_name="partial_error")
-                return {"「企業授權書」不同意授權未打勾"}
+                return {"agree_type_final": "1", "message": "「企業授權書」不同意授權未打勾"}
         else:
-            return {"企業授權書檔名命名錯誤"}
+            return {"agree_type_final": "1", "message": "企業授權書檔名命名錯誤"}
     elif classification(IMAGE_FILE, type_recognition_pth)[0] == 'contractor' and classification(IMAGE_FILE, type_recognition_pth)[1] > 0.7:
-    #elif classification(IMAGE_FILE, type_recognition_pth)[0] == 'contractor':
+        # elif classification(IMAGE_FILE, type_recognition_pth)[0] == 'contractor':
         if P_status == 1:
             # # 對照範例樣本有歪斜會自動翻轉
             if rotate_image:
                 corrected_image = correct_rotation(IMAGE_FILE, P_template_path)
             else:
                 corrected_image = cv2.imread(IMAGE_FILE)
-                corrected_image = cv2.cvtColor(corrected_image, cv2.COLOR_BGR2RGB)
+                corrected_image = cv2.cvtColor(
+                    corrected_image, cv2.COLOR_BGR2RGB)
             # 圖片對半裁剪只留下半部
             crop_img = crop_image_bottom_half(corrected_image)
             # 企業合約書模型
@@ -520,9 +521,9 @@ def recognition_all(IMAGE_FILE, company_id, rep_id, E_status, P_status, rotate_i
                 return contractor_output_result
             elif any(value == -1 or value == 0 for value in values if isinstance(value, (int, float))):
                 status_string = ""
-                count_unrecognized = 0 # 未偵測次數計算
+                count_unrecognized = 0  # 未偵測次數計算
                 for key, value in contractor_output_result.items():
-                    if  key == "ocr_agree_check": 
+                    if key == "ocr_agree_check":
                         if value == 0:
                             status_string += "未勾選同意"
                         elif value == -1:
@@ -577,7 +578,8 @@ def recognition_all(IMAGE_FILE, company_id, rep_id, E_status, P_status, rotate_i
                 corrected_image = correct_rotation(IMAGE_FILE, P_template_path)
             else:
                 corrected_image = cv2.imread(IMAGE_FILE)
-                corrected_image = cv2.cvtColor(corrected_image, cv2.COLOR_BGR2RGB)
+                corrected_image = cv2.cvtColor(
+                    corrected_image, cv2.COLOR_BGR2RGB)
             # 圖片對半裁剪只留上半部
             crop_img_top = crop_image_top_half(corrected_image)
             # 企業合約書模型辨識結果
@@ -589,9 +591,9 @@ def recognition_all(IMAGE_FILE, company_id, rep_id, E_status, P_status, rotate_i
                 # 保存錯誤的圖片
                 save_error_image(crop_img_top, IMAGE_FILE,
                                  folder_name="partial_error")
-                return {"「負責人授權書」不同意授權未打勾"}
+                return {"agree_type_final": "2", "message": " 「負責人授權書」不同意授權未打勾"}
         else:
-            return {"負責人授權書檔名命名錯誤"}
+            return {"agree_type_final": "2", "message": " 「負責人授權書」檔名命名錯誤"}
     else:
         # 將錯誤訊息寫入 log 檔
         logging.error("[%s] 授權書類型錯誤" % current_time)
@@ -732,7 +734,7 @@ def agree_ai_check(company_id, rep_id, location, agree_file_name, E_status, P_st
                 # 顯示警告訊息
                 print("警告：副檔名有誤，未知的檔案類型: {}".format(file_extension))
                 return {"status_code": "10005",
-                        "message": "Unknown file type",
+                        "message": "副檔名有誤，未知的檔案類型",
                         "agree_type_final": None}
     else:
         # 將錯誤訊息寫入 log 檔
@@ -740,5 +742,5 @@ def agree_ai_check(company_id, rep_id, location, agree_file_name, E_status, P_st
         # 顯示警告訊息
         print("警告：資料夾內沒有檔案")
         return {"status_code": "10001",
-                "message": "Agree file not found",
+                "message": "資料夾內沒有檔案",
                 "agree_type_final": None}

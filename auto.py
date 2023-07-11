@@ -449,7 +449,8 @@ if not df.empty:
 
     df_fail = df[~df['result'].isin(['agree', 'disagree'])]
 
-    df_fail.to_csv('全部授權書_模型辨識不通過原因.csv', mode='a', index=False, header=write_header, encoding='big5')
+    df_fail.to_csv('全部授權書_模型辨識不通過原因.csv', mode='a', index=False,
+                   header=write_header, encoding='big5')
 
 # group by 同一個 folder 名稱下的 result
 grouped_df = df.groupby('folder')
@@ -473,13 +474,13 @@ for folder, group in grouped_df:
     # elif group['result'].notna().any():
     #     result = 'Fail'
     elif agree_type_1.empty and agree_type_2.empty:
-        result = "授權書1結果為:缺少， 授權書2結果為:缺少"
+        result = "授權書E結果為:缺少， 授權書P結果為:缺少"
     elif agree_type_1.empty:
-        result = f"授權書1結果為:缺少， 授權書2結果為: {', '.join(agree_type_2)}"
+        result = f"授權書E結果為:缺少， 授權書P結果為: {', '.join(agree_type_2)}"
     elif agree_type_2.empty:
-        result = f"授權書1結果為:{'、'.join(agree_type_1)}， 授權書2結果為:缺少"
+        result = f"授權書E結果為:{'、'.join(agree_type_1)}， 授權書P結果為:缺少"
     elif agree_type_1.notna().any() and agree_type_2.notna().any():
-        result = f"授權書1結果為:{'、'.join(agree_type_1)}， 授權書2結果為:{'、'.join(agree_type_2)}"
+        result = f"授權書E結果為:{'、'.join(agree_type_1)}， 授權書P結果為:{'、'.join(agree_type_2)}"
     else:
         result = None
 
@@ -508,7 +509,8 @@ if not filtered_df.empty:
     filtered_df_fail = filtered_df[~filtered_df['ai_result'].isin(
         ['企業同意/負責人同意且通過', '企業不同意/負責人同意且通過', '企業同意/負責人不同意且通過', '企業不同意/負責人不同意且通過'])]
 
-    filtered_df_fail.to_csv('統整授權書_模型辨識不通過原因.csv', mode='a', index=False, header=write_header, encoding='big5')
+    filtered_df_fail.to_csv('統整授權書_模型辨識不通過原因.csv', mode='a',
+                            index=False, header=write_header, encoding='big5')
 
 current_time = datetime.now()
 formatted_time = current_time.strftime("%Y-%m-%d")  # 把":"換成"-"，因為":"不能作為路徑的一部分
