@@ -511,6 +511,8 @@ if not filtered_df.empty:
 
     filtered_df_fail.to_csv('統整授權書_模型辨識不通過原因.csv', mode='a',
                             index=False, header=write_header, encoding='big5')
+else:
+    filtered_df_fail = pd.DataFrame([])
 
 current_time = datetime.now()
 formatted_time = current_time.strftime("%Y-%m-%d")  # 把":"換成"-"，因為":"不能作為路徑的一部分
@@ -694,9 +696,11 @@ Fail_num = len(combine[~combine['ai_result'].isin(
 if filtered_df_fail.empty:
     fail_reason = "沒有失敗案件"
 else:
-    fail_reason = filtered_df_fail.to_string(index=False, header='center')
-
-
+    try:
+        fail_reason = filtered_df_fail[['pno', 'ai_result']].to_string(
+            index=False, header=False)
+    except Exception as e:
+        logger.info(e)
 msg = f"\n總案件:{total_num}\n-企業同意/負責人同意且通過案件數:{all_agree_num}\n-企業不同意/負責人同意且通過案件數:{E_disagree_P_agree_num}\n-企業同意/負責人不同意且通過案件數:{E_agree_P_disagree_num}\n-企業不同意/負責人不同意且通過案件數:{all_disagree_num}\n-失敗案件數:{Fail_num}\n-等待人工審核案件數:{wait_to_check_num}\n---------------\n失敗原因:\n{fail_reason}"
 logger.info(msg)
 snd_line(msg)
