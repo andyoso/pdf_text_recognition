@@ -691,6 +691,12 @@ wait_to_check_num = len(combine[combine['_merge'] == 'left_only'])
 Fail_num = len(combine[~combine['ai_result'].isin(
     ['企業同意/負責人同意且通過', '企業同意/負責人不同意且通過', '企業不同意/負責人同意且通過', '企業不同意/負責人不同意且通過'])]) - wait_to_check_num
 
-msg = f"\n總案件:{total_num}\n-企業同意/負責人同意且通過案件數:{all_agree_num}\n-企業不同意/負責人同意且通過案件數:{E_disagree_P_agree_num}\n-企業同意/負責人不同意且通過案件數:{E_agree_P_disagree_num}\n-企業不同意/負責人不同意且通過案件數:{all_disagree_num}\n-失敗案件數:{Fail_num}\n-等待人工審核案件數:{wait_to_check_num}"
+if filtered_df_fail.empty:
+    fail_reason = "沒有失敗案件"
+else:
+    fail_reason = filtered_df_fail.to_string(index=False, header='center')
+
+
+msg = f"\n總案件:{total_num}\n-企業同意/負責人同意且通過案件數:{all_agree_num}\n-企業不同意/負責人同意且通過案件數:{E_disagree_P_agree_num}\n-企業同意/負責人不同意且通過案件數:{E_agree_P_disagree_num}\n-企業不同意/負責人不同意且通過案件數:{all_disagree_num}\n-失敗案件數:{Fail_num}\n-等待人工審核案件數:{wait_to_check_num}\n---------------\n失敗原因:\n{fail_reason}"
 logger.info(msg)
 snd_line(msg)
