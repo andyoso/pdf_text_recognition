@@ -47,8 +47,8 @@ E_template_path = 'datasets/template/E_template.jpg'
 # WEIGHTS_contractor_pt = os.path.join(current_dir, 'weights', 'contractor.pt')
 
 type_recognition_pth = 'weights/recognition_type.pth'
-WEIGHTS_enterprise_pt = 'weights/enterprise_V2.pt'
-WEIGHTS_contractor_pt = 'weights/contractor_V2.pt'
+WEIGHTS_enterprise_pt = 'weights/enterprise_v3.pt'
+WEIGHTS_contractor_pt = 'weights/contractor_v3.pt'
 
 
 # 判斷 TIFF/TIF 頁數
