@@ -15,6 +15,7 @@ import shutil
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import logging
+import urllib.parse
 
 # 創建一個logger
 logger = logging.getLogger(__name__)
@@ -173,12 +174,12 @@ link_df['link'] = links
 link_df['case_id'] = link_df['link'].apply(lambda x: x.split(
     "/fs")[1].split("_")[0] if "/fs" in x and "_" in x else None)
 # link_df['ent_or_rep'] = link_df['link'].apply(lambda x: x.split(".pdf")[0].split("-")[1] if "-" in x and ".pdf" in x else None)
-link_df['ent_or_rep'] = link_df['link'].apply(lambda x: x.split(".pdf")[0].split("-")[1] if "-" in x and ".pdf" in x
-                                              else x.split(".jpeg")[0].split("-")[1] if "-" in x and ".jpeg" in x
-                                              else x.split(".jpg")[0].split("-")[1] if "-" in x and ".jpg" in x
-                                              else x.split(".png")[0].split("-")[1] if "-" in x and ".png" in x
-                                              else x.split(".tif")[0].split("-")[1] if "-" in x and ".tif" in x
-                                              else x.split(".tiff")[0].split("-")[1] if "-" in x and ".tiff" in x
+link_df['ent_or_rep'] = link_df['link'].apply(lambda x: x.split(".pdf")[0].split("-")[1] if "-" in x and x.lower().endswith(".pdf")
+                                              else x.split(".jpeg")[0].split("-")[1] if "-" in x and x.lower().endswith(".jpeg")
+                                              else x.split(".jpg")[0].split("-")[1] if "-" in x and x.lower().endswith(".jpg")
+                                              else x.split(".png")[0].split("-")[1] if "-" in x and x.lower().endswith(".png")
+                                              else x.split(".tif")[0].split("-")[1] if "-" in x and x.lower().endswith(".tif")
+                                              else x.split(".tiff")[0].split("-")[1] if "-" in x and x.lower().endswith(".tiff")
                                               else None)
 link_df['file'] = link_df['link'].apply(
     lambda x: x.split("/")[1] if "/" in x else None)
@@ -206,7 +207,6 @@ two_file_case_list = link_df[link_df['case_id'].isin(case_ids)]
 
 
 def download_file(case_id, file_url, file_name):
-
     # 資料夾名稱
     folder_name = case_id
     folder_name = 'datasets\\temp\\'+folder_name
@@ -222,8 +222,10 @@ def download_file(case_id, file_url, file_name):
 
     # Check if the request was successful
     if response.status_code == 200:
+        # 使用URL編碼處理檔案名稱
+        encoded_file_name = urllib.parse.quote(file_name)
         # Open a file in write-binary mode and write the response content to it
-        with open(os.path.join(folder_name, file_name), 'wb') as f:
+        with open(os.path.join(folder_name, encoded_file_name), 'wb') as f:
             print(f"Success to download: {download_url}")
             logger.info(f"Success to download: {download_url}")
 
@@ -231,6 +233,7 @@ def download_file(case_id, file_url, file_name):
     else:
         print(f"Failed to download file :{download_url}")
         logger.info(f"Failed to download file :{download_url}")
+
 
 #         snd_line(f"Failed to download file :{download_url}")
 
@@ -275,87 +278,86 @@ folder_list = os.listdir(folder_path)
 
 
 df = pd.DataFrame(columns=['folder', 'file', 'result', 'timestamp'])
-timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+timestamp = str(datetime.now().strftime('%Y%m%d%H%M%S'))
 
 
-all_file_list = []
-# 列出每個子資料夾下的所有檔案
-all_agree_folder_path = 'datasets\\all_agree'
-# 檢查資料夾是否存在，若不存在則創建資料夾
-if not os.path.exists(all_agree_folder_path):
-    os.makedirs(all_agree_folder_path)
+# all_file_list = []
+# # 列出每個子資料夾下的所有檔案
+# all_agree_folder_path = 'datasets\\all_agree'
+# # 檢查資料夾是否存在，若不存在則創建資料夾
+# if not os.path.exists(all_agree_folder_path):
+#     os.makedirs(all_agree_folder_path)
 
-all_agree_folder_list = os.listdir(all_agree_folder_path)
-for subfolder in all_agree_folder_list:
-    subfolder_path = os.path.join(all_agree_folder_path, subfolder)
-    if os.path.isdir(subfolder_path):  # 確保是一個資料夾，而不是一個檔案
-        subfolder_files = os.listdir(subfolder_path)
-        print(f"Files in {subfolder}:")
-        for file in subfolder_files:
-            all_file_list.append(file)
+# all_agree_folder_list = os.listdir(all_agree_folder_path)
+# for subfolder in all_agree_folder_list:
+#     subfolder_path = os.path.join(all_agree_folder_path, subfolder)
+#     if os.path.isdir(subfolder_path):  # 確保是一個資料夾，而不是一個檔案
+#         subfolder_files = os.listdir(subfolder_path)
+#         print(f"Files in {subfolder}:")
+#         for file in subfolder_files:
+#             all_file_list.append(file)
 
-E_agree_P_disagree_folder_path = 'datasets\\E_agree_P_disagree'
-# 檢查資料夾是否存在，若不存在則創建資料夾
-if not os.path.exists(E_agree_P_disagree_folder_path):
-    os.makedirs(E_agree_P_disagree_folder_path)
-E_agree_P_disagree_folder_list = os.listdir(E_agree_P_disagree_folder_path)
-# 列出每個子資料夾下的所有檔案
-for subfolder in E_agree_P_disagree_folder_list:
-    subfolder_path = os.path.join(E_agree_P_disagree_folder_path, subfolder)
-    if os.path.isdir(subfolder_path):  # 確保是一個資料夾，而不是一個檔案
-        subfolder_files = os.listdir(subfolder_path)
-        print(f"Files in {subfolder}:")
-        for file in subfolder_files:
-            all_file_list.append(file)
+# E_agree_P_disagree_folder_path = 'datasets\\E_agree_P_disagree'
+# # 檢查資料夾是否存在，若不存在則創建資料夾
+# if not os.path.exists(E_agree_P_disagree_folder_path):
+#     os.makedirs(E_agree_P_disagree_folder_path)
+# E_agree_P_disagree_folder_list = os.listdir(E_agree_P_disagree_folder_path)
+# # 列出每個子資料夾下的所有檔案
+# for subfolder in E_agree_P_disagree_folder_list:
+#     subfolder_path = os.path.join(E_agree_P_disagree_folder_path, subfolder)
+#     if os.path.isdir(subfolder_path):  # 確保是一個資料夾，而不是一個檔案
+#         subfolder_files = os.listdir(subfolder_path)
+#         print(f"Files in {subfolder}:")
+#         for file in subfolder_files:
+#             all_file_list.append(file)
 
-E_disagree_P_agree_folder_path = 'datasets\\E_disagree_P_agree'
-if not os.path.exists(E_disagree_P_agree_folder_path):
-    os.makedirs(E_disagree_P_agree_folder_path)
-E_disagree_P_agree_folder_list = os.listdir(E_disagree_P_agree_folder_path)
-# 列出每個子資料夾下的所有檔案
-for subfolder in E_disagree_P_agree_folder_list:
-    subfolder_path = os.path.join(E_disagree_P_agree_folder_path, subfolder)
-    if os.path.isdir(subfolder_path):  # 確保是一個資料夾，而不是一個檔案
-        subfolder_files = os.listdir(subfolder_path)
-        print(f"Files in {subfolder}:")
-        for file in subfolder_files:
-            all_file_list.append(file)
+# E_disagree_P_agree_folder_path = 'datasets\\E_disagree_P_agree'
+# if not os.path.exists(E_disagree_P_agree_folder_path):
+#     os.makedirs(E_disagree_P_agree_folder_path)
+# E_disagree_P_agree_folder_list = os.listdir(E_disagree_P_agree_folder_path)
+# # 列出每個子資料夾下的所有檔案
+# for subfolder in E_disagree_P_agree_folder_list:
+#     subfolder_path = os.path.join(E_disagree_P_agree_folder_path, subfolder)
+#     if os.path.isdir(subfolder_path):  # 確保是一個資料夾，而不是一個檔案
+#         subfolder_files = os.listdir(subfolder_path)
+#         print(f"Files in {subfolder}:")
+#         for file in subfolder_files:
+#             all_file_list.append(file)
 
 
-all_disagree_folder_path = 'datasets\\all_disagree'
-if not os.path.exists(all_disagree_folder_path):
-    os.makedirs(all_disagree_folder_path)
-all_disagree_folder_list = os.listdir(all_disagree_folder_path)
-# 列出每個子資料夾下的所有檔案
-for subfolder in all_disagree_folder_list:
-    subfolder_path = os.path.join(all_disagree_folder_path, subfolder)
-    if os.path.isdir(subfolder_path):  # 確保是一個資料夾，而不是一個檔案
-        subfolder_files = os.listdir(subfolder_path)
-        print(f"Files in {subfolder}:")
-        for file in subfolder_files:
-            all_file_list.append(file)
+# all_disagree_folder_path = 'datasets\\all_disagree'
+# if not os.path.exists(all_disagree_folder_path):
+#     os.makedirs(all_disagree_folder_path)
+# all_disagree_folder_list = os.listdir(all_disagree_folder_path)
+# # 列出每個子資料夾下的所有檔案
+# for subfolder in all_disagree_folder_list:
+#     subfolder_path = os.path.join(all_disagree_folder_path, subfolder)
+#     if os.path.isdir(subfolder_path):  # 確保是一個資料夾，而不是一個檔案
+#         subfolder_files = os.listdir(subfolder_path)
+#         print(f"Files in {subfolder}:")
+#         for file in subfolder_files:
+#             all_file_list.append(file)
 
-Fail_folder_path = 'datasets\\Fail'
-if not os.path.exists(Fail_folder_path):
-    os.makedirs(Fail_folder_path)
-Fail_folder_list = os.listdir(Fail_folder_path)
-# 列出每個子資料夾下的所有檔案
-for subfolder in Fail_folder_list:
-    subfolder_path = os.path.join(Fail_folder_path, subfolder)
-    if os.path.isdir(subfolder_path):  # 確保是一個資料夾，而不是一個檔案
-        subfolder_files = os.listdir(subfolder_path)
-        print(f"Files in {subfolder}:")
-        for file in subfolder_files:
-            all_file_list.append(file)
+# Fail_folder_path = 'datasets\\Fail'
+# if not os.path.exists(Fail_folder_path):
+#     os.makedirs(Fail_folder_path)
+# Fail_folder_list = os.listdir(Fail_folder_path)
+# # 列出每個子資料夾下的所有檔案
+# for subfolder in Fail_folder_list:
+#     subfolder_path = os.path.join(Fail_folder_path, subfolder)
+#     if os.path.isdir(subfolder_path):  # 確保是一個資料夾，而不是一個檔案
+#         subfolder_files = os.listdir(subfolder_path)
+#         print(f"Files in {subfolder}:")
+#         for file in subfolder_files:
+#             all_file_list.append(file)
 
 
 for folder in tqdm(folder_list):
     print(f"folder : {folder}")
-    if folder in all_file_list:
-        print(f"已審核過{folder}")
-        logger.info(f"已審核過{folder}")
-        continue
-
+#     if folder in all_file_list:
+#         print(f"已審核過{folder}")
+#         logger.info(f"已審核過{folder}")
+#         continue
     folder_full_path = os.path.join(folder_path, folder)  # 資料夾的完整路徑
     files_list = os.listdir(folder_full_path)  # 資料夾內的所有檔案
     if len(files_list) > 0:
@@ -608,7 +610,6 @@ combine.sort_values('案件編號')
 print(combine)
 logger.info(combine)
 
-# ----------------------- 以下待修改--------------------------------
 submit_list_1 = combine[combine['ai_result']
                         == '企業同意/負責人同意且通過'].reset_index(drop=True)
 submit_list_2 = combine[combine['ai_result']
@@ -697,10 +698,13 @@ if filtered_df_fail.empty:
     fail_reason = "沒有失敗案件"
 else:
     try:
-        fail_reason = filtered_df_fail[['pno', 'ai_result']].to_string(
-            index=False, header=False)
+        fail_reason_formatted = filtered_df_fail.apply(
+            lambda row: f"{row['pno']}\n{row['ai_result'].split('，')[0]}\n{row['ai_result'].split('，')[1]}", axis=1)
+        fail_reason = "\n".join(fail_reason_formatted)
+        # fail_reason = filtered_df_fail[['pno', 'ai_result']].to_string(
+        #     index=False, header=False)
     except Exception as e:
         logger.info(e)
-msg = f"\n總案件:{total_num}\n-企業同意/負責人同意且通過案件數:{all_agree_num}\n-企業不同意/負責人同意且通過案件數:{E_disagree_P_agree_num}\n-企業同意/負責人不同意且通過案件數:{E_agree_P_disagree_num}\n-企業不同意/負責人不同意且通過案件數:{all_disagree_num}\n-失敗案件數:{Fail_num}\n-等待人工審核案件數:{wait_to_check_num}\n---------------\n失敗原因:\n{fail_reason}"
+msg = f"\n總案件:{total_num}\n-企業同意/負責人同意且通過案件數:{all_agree_num}\n-企業不同意/負責人同意且通過案件數:{E_disagree_P_agree_num}\n-企業同意/負責人不同意且通過案件數:{E_agree_P_disagree_num}\n-企業不同意/負責人不同意且通過案件數:{all_disagree_num}\n-失敗案件數:{Fail_num}\n-等待人工審核案件數:{wait_to_check_num}\n----------------------------\n失敗原因:\n{fail_reason}"
 logger.info(msg)
 snd_line(msg)
