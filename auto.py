@@ -476,13 +476,13 @@ for folder, group in grouped_df:
     # elif group['result'].notna().any():
     #     result = 'Fail'
     elif agree_type_1.empty and agree_type_2.empty:
-        result = "授權書E結果為:缺少， 授權書P結果為:缺少"
+        result = "授權書E結果為:缺少，授權書P結果為:缺少"
     elif agree_type_1.empty:
-        result = f"授權書E結果為:缺少， 授權書P結果為: {', '.join(agree_type_2)}"
+        result = f"授權書E結果為:缺少，授權書P結果為: {', '.join(agree_type_2)}"
     elif agree_type_2.empty:
-        result = f"授權書E結果為:{'、'.join(agree_type_1)}， 授權書P結果為:缺少"
+        result = f"授權書E結果為:{'、'.join(agree_type_1)}，授權書P結果為:缺少"
     elif agree_type_1.notna().any() and agree_type_2.notna().any():
-        result = f"授權書E結果為:{'、'.join(agree_type_1)}， 授權書P結果為:{'、'.join(agree_type_2)}"
+        result = f"授權書E結果為:{'、'.join(agree_type_1)}，授權書P結果為:{'、'.join(agree_type_2)}"
     else:
         result = None
 
