@@ -238,7 +238,24 @@ def download_file(case_id, file_url, file_name):
 #         snd_line(f"Failed to download file :{download_url}")
 
 
-shutil.rmtree(r'datasets/temp')
+folder_path = 'datasets/temp'
+
+if os.path.isdir(folder_path):
+    os.makedirs(folder_path, exist_ok=True)
+
+# 檢查 'datasets/temp' 資料夾是否存在
+if os.path.exists(folder_path) and os.path.isdir(folder_path):
+    # 遞迴刪除子資料夾及其內容
+    try:
+        shutil.rmtree(folder_path)
+    except Exception as e:
+        logging.error(f"Failed to delete file/folder: {folder_path} {e}")
+        print(f"Failed to delete file/folder: {folder_path}")
+        print(e)
+else:
+    # 資料夾不存在，建立資料夾
+    os.makedirs(folder_path)
+
 
 print("下載檔案..")
 
@@ -256,11 +273,11 @@ current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # 從外部傳入資料夾路徑
 # folder_path = sys.argv[1]
-folder_path = r'datasets\temp'
+#folder_path = r'datasets\temp'
 
-# 檢查資料夾是否存在，若不存在則創建資料夾
-if not os.path.exists(folder_path):
-    os.makedirs(folder_path)
+# # 檢查資料夾是否存在，若不存在則創建資料夾
+# if not os.path.exists(folder_path):
+#     os.makedirs(folder_path)
 
 # 檢查 folder_path 是不是一個資料夾
 if not os.path.isdir(folder_path):
@@ -281,83 +298,83 @@ df = pd.DataFrame(columns=['folder', 'file', 'result', 'timestamp'])
 timestamp = str(datetime.now().strftime('%Y%m%d%H%M%S'))
 
 
-# all_file_list = []
-# # 列出每個子資料夾下的所有檔案
-# all_agree_folder_path = 'datasets\\all_agree'
-# # 檢查資料夾是否存在，若不存在則創建資料夾
-# if not os.path.exists(all_agree_folder_path):
-#     os.makedirs(all_agree_folder_path)
+all_file_list = []
+# 列出每個子資料夾下的所有檔案
+all_agree_folder_path = 'datasets\\all_agree'
+# 檢查資料夾是否存在，若不存在則創建資料夾
+if not os.path.exists(all_agree_folder_path):
+    os.makedirs(all_agree_folder_path)
 
-# all_agree_folder_list = os.listdir(all_agree_folder_path)
-# for subfolder in all_agree_folder_list:
-#     subfolder_path = os.path.join(all_agree_folder_path, subfolder)
-#     if os.path.isdir(subfolder_path):  # 確保是一個資料夾，而不是一個檔案
-#         subfolder_files = os.listdir(subfolder_path)
-#         print(f"Files in {subfolder}:")
-#         for file in subfolder_files:
-#             all_file_list.append(file)
+all_agree_folder_list = os.listdir(all_agree_folder_path)
+for subfolder in all_agree_folder_list:
+    subfolder_path = os.path.join(all_agree_folder_path, subfolder)
+    if os.path.isdir(subfolder_path):  # 確保是一個資料夾，而不是一個檔案
+        subfolder_files = os.listdir(subfolder_path)
+        print(f"Files in {subfolder}:")
+        for file in subfolder_files:
+            all_file_list.append(file)
 
-# E_agree_P_disagree_folder_path = 'datasets\\E_agree_P_disagree'
-# # 檢查資料夾是否存在，若不存在則創建資料夾
-# if not os.path.exists(E_agree_P_disagree_folder_path):
-#     os.makedirs(E_agree_P_disagree_folder_path)
-# E_agree_P_disagree_folder_list = os.listdir(E_agree_P_disagree_folder_path)
-# # 列出每個子資料夾下的所有檔案
-# for subfolder in E_agree_P_disagree_folder_list:
-#     subfolder_path = os.path.join(E_agree_P_disagree_folder_path, subfolder)
-#     if os.path.isdir(subfolder_path):  # 確保是一個資料夾，而不是一個檔案
-#         subfolder_files = os.listdir(subfolder_path)
-#         print(f"Files in {subfolder}:")
-#         for file in subfolder_files:
-#             all_file_list.append(file)
+E_agree_P_disagree_folder_path = 'datasets\\E_agree_P_disagree'
+# 檢查資料夾是否存在，若不存在則創建資料夾
+if not os.path.exists(E_agree_P_disagree_folder_path):
+    os.makedirs(E_agree_P_disagree_folder_path)
+E_agree_P_disagree_folder_list = os.listdir(E_agree_P_disagree_folder_path)
+# 列出每個子資料夾下的所有檔案
+for subfolder in E_agree_P_disagree_folder_list:
+    subfolder_path = os.path.join(E_agree_P_disagree_folder_path, subfolder)
+    if os.path.isdir(subfolder_path):  # 確保是一個資料夾，而不是一個檔案
+        subfolder_files = os.listdir(subfolder_path)
+        print(f"Files in {subfolder}:")
+        for file in subfolder_files:
+            all_file_list.append(file)
 
-# E_disagree_P_agree_folder_path = 'datasets\\E_disagree_P_agree'
-# if not os.path.exists(E_disagree_P_agree_folder_path):
-#     os.makedirs(E_disagree_P_agree_folder_path)
-# E_disagree_P_agree_folder_list = os.listdir(E_disagree_P_agree_folder_path)
-# # 列出每個子資料夾下的所有檔案
-# for subfolder in E_disagree_P_agree_folder_list:
-#     subfolder_path = os.path.join(E_disagree_P_agree_folder_path, subfolder)
-#     if os.path.isdir(subfolder_path):  # 確保是一個資料夾，而不是一個檔案
-#         subfolder_files = os.listdir(subfolder_path)
-#         print(f"Files in {subfolder}:")
-#         for file in subfolder_files:
-#             all_file_list.append(file)
+E_disagree_P_agree_folder_path = 'datasets\\E_disagree_P_agree'
+if not os.path.exists(E_disagree_P_agree_folder_path):
+    os.makedirs(E_disagree_P_agree_folder_path)
+E_disagree_P_agree_folder_list = os.listdir(E_disagree_P_agree_folder_path)
+# 列出每個子資料夾下的所有檔案
+for subfolder in E_disagree_P_agree_folder_list:
+    subfolder_path = os.path.join(E_disagree_P_agree_folder_path, subfolder)
+    if os.path.isdir(subfolder_path):  # 確保是一個資料夾，而不是一個檔案
+        subfolder_files = os.listdir(subfolder_path)
+        print(f"Files in {subfolder}:")
+        for file in subfolder_files:
+            all_file_list.append(file)
 
 
-# all_disagree_folder_path = 'datasets\\all_disagree'
-# if not os.path.exists(all_disagree_folder_path):
-#     os.makedirs(all_disagree_folder_path)
-# all_disagree_folder_list = os.listdir(all_disagree_folder_path)
-# # 列出每個子資料夾下的所有檔案
-# for subfolder in all_disagree_folder_list:
-#     subfolder_path = os.path.join(all_disagree_folder_path, subfolder)
-#     if os.path.isdir(subfolder_path):  # 確保是一個資料夾，而不是一個檔案
-#         subfolder_files = os.listdir(subfolder_path)
-#         print(f"Files in {subfolder}:")
-#         for file in subfolder_files:
-#             all_file_list.append(file)
+all_disagree_folder_path = 'datasets\\all_disagree'
+if not os.path.exists(all_disagree_folder_path):
+    os.makedirs(all_disagree_folder_path)
+all_disagree_folder_list = os.listdir(all_disagree_folder_path)
+# 列出每個子資料夾下的所有檔案
+for subfolder in all_disagree_folder_list:
+    subfolder_path = os.path.join(all_disagree_folder_path, subfolder)
+    if os.path.isdir(subfolder_path):  # 確保是一個資料夾，而不是一個檔案
+        subfolder_files = os.listdir(subfolder_path)
+        print(f"Files in {subfolder}:")
+        for file in subfolder_files:
+            all_file_list.append(file)
 
-# Fail_folder_path = 'datasets\\Fail'
-# if not os.path.exists(Fail_folder_path):
-#     os.makedirs(Fail_folder_path)
-# Fail_folder_list = os.listdir(Fail_folder_path)
-# # 列出每個子資料夾下的所有檔案
-# for subfolder in Fail_folder_list:
-#     subfolder_path = os.path.join(Fail_folder_path, subfolder)
-#     if os.path.isdir(subfolder_path):  # 確保是一個資料夾，而不是一個檔案
-#         subfolder_files = os.listdir(subfolder_path)
-#         print(f"Files in {subfolder}:")
-#         for file in subfolder_files:
-#             all_file_list.append(file)
+Fail_folder_path = 'datasets\\Fail'
+if not os.path.exists(Fail_folder_path):
+    os.makedirs(Fail_folder_path)
+Fail_folder_list = os.listdir(Fail_folder_path)
+# 列出每個子資料夾下的所有檔案
+for subfolder in Fail_folder_list:
+    subfolder_path = os.path.join(Fail_folder_path, subfolder)
+    if os.path.isdir(subfolder_path):  # 確保是一個資料夾，而不是一個檔案
+        subfolder_files = os.listdir(subfolder_path)
+        print(f"Files in {subfolder}:")
+        for file in subfolder_files:
+            all_file_list.append(file)
 
 
 for folder in tqdm(folder_list):
     print(f"folder : {folder}")
-#     if folder in all_file_list:
-#         print(f"已審核過{folder}")
-#         logger.info(f"已審核過{folder}")
-#         continue
+    if folder in all_file_list:
+        print(f"已審核過{folder}")
+        logger.info(f"已審核過{folder}")
+        continue
     folder_full_path = os.path.join(folder_path, folder)  # 資料夾的完整路徑
     files_list = os.listdir(folder_full_path)  # 資料夾內的所有檔案
     if len(files_list) > 0:
