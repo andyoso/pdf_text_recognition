@@ -525,39 +525,39 @@ def recognition_all(IMAGE_FILE, company_id, rep_id, E_status, P_status, rotate_i
                 for key, value in contractor_output_result.items():
                     if key == "ocr_agree_check":
                         if value == 0:
-                            status_string += "未勾選同意"
+                            status_string += "未勾選同意/"
                         elif value == -1:
-                            status_string += "未偵測勾選同意"
+                            status_string += "未偵測勾選同意/"
                             count_unrecognized += 1
                     elif key == "ocr_rep_seal":
                         if value == 0:
-                            status_string += "未蓋負責人印章"
+                            status_string += "未蓋負責人印章/"
                         elif value == -1:
-                            status_string += "未偵測負責人印章"
+                            status_string += "未偵測負責人印章/"
                             count_unrecognized += 1
                     elif key == "ocr_comp_id_check":
                         if value == 0:
-                            status_string += "未填寫統一編號"
+                            status_string += "未填寫統一編號/"
                         elif value == -1:
-                            status_string += "未偵測填寫統一編號"
+                            status_string += "未偵測填寫統一編號/"
                             count_unrecognized += 1
                     elif key == "ocr_comp_name":
                         if value == 0:
-                            status_string += "未填寫公司/行號名稱"
+                            status_string += "未填寫公司/行號名稱/"
                         elif value == -1:
-                            status_string += "未偵測填寫公司/行號名稱"
+                            status_string += "未偵測填寫公司/行號名稱/"
                             count_unrecognized += 1
                     elif key == "ocr_rep_name":
                         if value == 0:
-                            status_string += "未填寫立書人(企業負責人)"
+                            status_string += "未填寫立書人(企業負責人)/"
                         elif value == -1:
-                            status_string += "未偵測填寫立書人(企業負責人)"
+                            status_string += "未偵測填寫立書人(企業負責人)/"
                             count_unrecognized += 1
                     elif key == "ocr_rep_id_check":
                         if value == 0:
-                            status_string += "未填寫身分證字號"
+                            status_string += "未填寫身分證字號/"
                         elif value == -1:
-                            status_string += "未偵測填寫身分證字號"
+                            status_string += "未偵測填寫身分證字號/"
                             count_unrecognized += 1
                 if count_unrecognized >= 3:
                     status_string = "模型偵測異常，請確認授權書是否有誤"
