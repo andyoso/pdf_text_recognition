@@ -495,11 +495,33 @@ for folder, group in grouped_df:
     elif agree_type_1.empty and agree_type_2.empty:
         result = "授權書E結果為:缺少，授權書P結果為:缺少"
     elif agree_type_1.empty:
-        result = f"授權書E結果為:缺少，授權書P結果為: {', '.join(agree_type_2)}"
+        if any('disagree' in s for s in agree_type_2):
+            result = f"授權書E結果為:缺少， 授權書P結果為:'disagree'"
+        elif any('agree' in s for s in agree_type_2):
+            result = f"授權書E結果為:缺少， 授權書P結果為:'agree'"
+        else:
+            result = f"授權書E結果為:缺少， 授權書P結果為: {', '.join(agree_type_2)}"
     elif agree_type_2.empty:
-        result = f"授權書E結果為:{'、'.join(agree_type_1)}，授權書P結果為:缺少"
+        if any('disagree' in s for s in agree_type_1):
+            result = f"授權書E結果為:disagree， 授權書P結果為:'缺少'"
+        elif any('agree' in s for s in agree_type_1):
+            result = f"授權書E結果為:agree， 授權書P結果為:'缺少'"
+        else:
+            result = f"授權書E結果為:{'、'.join(agree_type_1)}， 授權書P結果為:缺少"
     elif agree_type_1.notna().any() and agree_type_2.notna().any():
-        result = f"授權書E結果為:{'、'.join(agree_type_1)}，授權書P結果為:{'、'.join(agree_type_2)}"
+        if any('disagree' in s for s in agree_type_1) == True and any('disagree' in s for s in agree_type_2) == False:
+            result = f"授權書E結果為:disagree， 授權書P結果為:{'、'.join(agree_type_2)}"
+
+        elif any('agree' in s for s in agree_type_1) == True and any('agree' in s for s in agree_type_2) == False:
+            result = f"授權書E結果為:agree， 授權書P結果為:{'、'.join(agree_type_2)}"
+
+        elif any('disagree' in s for s in agree_type_1) == False and any('disagree' in s for s in agree_type_2) == True:
+            result = f"授權書E結果為:{'、'.join(agree_type_1)}， 授權書P結果為:disagree"
+
+        elif any('agree' in s for s in agree_type_1) == False and any('agree' in s for s in agree_type_2) == True:
+            result = f"授權書E結果為:{'、'.join(agree_type_1)}， 授權書P結果為:agree"
+        else:
+            result = f"授權書E結果為:{'、'.join(agree_type_1)}， 授權書P結果為:{'、'.join(agree_type_2)}"
     else:
         result = None
 
