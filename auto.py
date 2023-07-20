@@ -16,6 +16,9 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 import logging
 import urllib.parse
+# 當天時間
+current_time = datetime.now()
+formatted_time = current_time.strftime("%Y-%m-%d")  # 把":"換成"-"，因為":"不能作為路徑的一部分
 
 # 創建一個logger
 logger = logging.getLogger(__name__)
@@ -306,6 +309,9 @@ if not os.path.exists(all_agree_folder_path):
     os.makedirs(all_agree_folder_path)
 
 all_agree_folder_list = os.listdir(all_agree_folder_path)
+# 過濾只保留今天日期的資料夾
+all_agree_folder_list = [
+    folder for folder in all_agree_folder_list if folder == formatted_time]
 for subfolder in all_agree_folder_list:
     subfolder_path = os.path.join(all_agree_folder_path, subfolder)
     if os.path.isdir(subfolder_path):  # 確保是一個資料夾，而不是一個檔案
@@ -319,6 +325,9 @@ E_agree_P_disagree_folder_path = 'datasets\\E_agree_P_disagree'
 if not os.path.exists(E_agree_P_disagree_folder_path):
     os.makedirs(E_agree_P_disagree_folder_path)
 E_agree_P_disagree_folder_list = os.listdir(E_agree_P_disagree_folder_path)
+# 過濾只保留今天日期的資料夾
+E_agree_P_disagree_folder_list = [
+    folder for folder in E_agree_P_disagree_folder_list if folder == formatted_time]
 # 列出每個子資料夾下的所有檔案
 for subfolder in E_agree_P_disagree_folder_list:
     subfolder_path = os.path.join(E_agree_P_disagree_folder_path, subfolder)
@@ -332,6 +341,9 @@ E_disagree_P_agree_folder_path = 'datasets\\E_disagree_P_agree'
 if not os.path.exists(E_disagree_P_agree_folder_path):
     os.makedirs(E_disagree_P_agree_folder_path)
 E_disagree_P_agree_folder_list = os.listdir(E_disagree_P_agree_folder_path)
+# 過濾只保留今天日期的資料夾
+E_disagree_P_agree_folder_list = [
+    folder for folder in E_disagree_P_agree_folder_list if folder == formatted_time]
 # 列出每個子資料夾下的所有檔案
 for subfolder in E_disagree_P_agree_folder_list:
     subfolder_path = os.path.join(E_disagree_P_agree_folder_path, subfolder)
@@ -346,6 +358,9 @@ all_disagree_folder_path = 'datasets\\all_disagree'
 if not os.path.exists(all_disagree_folder_path):
     os.makedirs(all_disagree_folder_path)
 all_disagree_folder_list = os.listdir(all_disagree_folder_path)
+# 過濾只保留今天日期的資料夾
+all_disagree_folder_list = [
+    folder for folder in all_disagree_folder_list if folder == formatted_time]
 # 列出每個子資料夾下的所有檔案
 for subfolder in all_disagree_folder_list:
     subfolder_path = os.path.join(all_disagree_folder_path, subfolder)
@@ -359,6 +374,9 @@ Fail_folder_path = 'datasets\\Fail'
 if not os.path.exists(Fail_folder_path):
     os.makedirs(Fail_folder_path)
 Fail_folder_list = os.listdir(Fail_folder_path)
+# 過濾只保留今天日期的資料夾
+Fail_folder_list = [
+    folder for folder in Fail_folder_list if folder == formatted_time]
 # 列出每個子資料夾下的所有檔案
 for subfolder in Fail_folder_list:
     subfolder_path = os.path.join(Fail_folder_path, subfolder)
@@ -554,9 +572,6 @@ if not filtered_df.empty:
                             index=False, header=write_header, encoding='big5')
 else:
     filtered_df_fail = pd.DataFrame([])
-
-current_time = datetime.now()
-formatted_time = current_time.strftime("%Y-%m-%d")  # 把":"換成"-"，因為":"不能作為路徑的一部分
 
 
 # 指定暫存資料夾的路徑
