@@ -18,9 +18,26 @@ import logging
 import urllib.parse
 
 
-def is_within_time_range(start_hour, end_hour):  # 程式在早上9點至晚上7點執行才有效
+def is_weekday(date):
+    # 利用calendar模組的weekday()函數判斷是否為平日 (0 ~ 4表示星期一至星期五)
+    return 0 <= date.weekday() <= 4
+
+
+def is_holiday(date):
+    # 自訂假日的日期列表，可以加入特殊節日等
+    holidays = [
+        '2023-09-29', '2023-10-10'
+    ]
+    return date.strftime('%Y-%m-%d') in holidays
+
+
+def is_within_time_range(start_hour, end_hour):
     # 取得當前時間
     current_time = datetime.now()
+    # 檢查是否為平日且不是假日
+    if not (is_weekday(current_time) and not is_holiday(current_time)):
+        return False
+
     # 設定起始時間和結束時間
     start_time = datetime(
         current_time.year, current_time.month, current_time.day, start_hour, 0)
