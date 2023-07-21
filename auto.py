@@ -31,7 +31,7 @@ def is_within_time_range(start_hour, end_hour):  # 程式在早上9點至晚上7
     return start_time <= current_time < end_time
 
 
-if is_within_time_range(9, 19):
+if not is_within_time_range(9, 19):
     sys.exit()
 
 # 當天時間
