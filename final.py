@@ -543,9 +543,9 @@ def recognition_all(IMAGE_FILE, company_id, rep_id, E_status, P_status, rotate_i
                             count_unrecognized += 1
                     elif key == "ocr_comp_name":
                         if value == 0:
-                            status_string += "未填寫公司/行號名稱/"
+                            status_string += "未填寫公司行號名稱/"
                         elif value == -1:
-                            status_string += "未偵測填寫公司/行號名稱/"
+                            status_string += "未偵測填寫公司行號名稱/"
                             count_unrecognized += 1
                     elif key == "ocr_rep_name":
                         if value == 0:
