@@ -468,7 +468,7 @@ def recognition_all(IMAGE_FILE, company_id, rep_id, E_status, P_status, rotate_i
                 # 保存錯誤的圖片
                 save_error_image(crop_img_top, IMAGE_FILE,
                                  folder_name="partial_error")
-                return {"agree_type_final": "1", "message": "「企業授權書」不同意授權未打勾"}
+                return {"agree_type_final": "1", "message": "未勾選不同意"}
         else:
             return {"agree_type_final": "1", "message": "企業授權書檔名命名錯誤"}
     elif classification(IMAGE_FILE, type_recognition_pth)[0] == 'contractor' and classification(IMAGE_FILE, type_recognition_pth)[1] > 0.7:
@@ -591,9 +591,9 @@ def recognition_all(IMAGE_FILE, company_id, rep_id, E_status, P_status, rotate_i
                 # 保存錯誤的圖片
                 save_error_image(crop_img_top, IMAGE_FILE,
                                  folder_name="partial_error")
-                return {"agree_type_final": "2", "message": " 「負責人授權書」不同意授權未打勾"}
+                return {"agree_type_final": "2", "message": "未勾選不同意"}
         else:
-            return {"agree_type_final": "2", "message": " 「負責人授權書」檔名命名錯誤"}
+            return {"agree_type_final": "2", "message": "「負責人授權書」檔名命名錯誤"}
     else:
         # 將錯誤訊息寫入 log 檔
         logging.error("[%s] 授權書類型錯誤" % current_time)
