@@ -16,6 +16,24 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 import logging
 import urllib.parse
+
+
+def is_within_time_range(start_hour, end_hour):  # 程式在早上9點至晚上7點執行才有效
+    # 取得當前時間
+    current_time = datetime.now()
+    # 設定起始時間和結束時間
+    start_time = datetime(
+        current_time.year, current_time.month, current_time.day, start_hour, 0)
+    end_time = datetime(current_time.year, current_time.month,
+                        current_time.day, end_hour, 0)
+
+    # 檢查當前時間是否在指定時間範圍內
+    return start_time <= current_time < end_time
+
+
+if is_within_time_range(9, 19):
+    sys.exit()
+
 # 當天時間
 current_time = datetime.now()
 formatted_time = current_time.strftime("%Y-%m-%d")  # 把":"換成"-"，因為":"不能作為路徑的一部分
