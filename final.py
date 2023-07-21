@@ -139,8 +139,11 @@ def correct_rotation(image_path, template_path):
     # Estimate affine transformation matrix using RANSAC
     M, _ = cv2.estimateAffinePartial2D(src_pts, dst_pts, method=cv2.RANSAC)
 
-    # Calculate rotation angle from transformation matrix
-    angle = np.arctan2(M[1, 0], M[0, 0]) * 180 / np.pi
+    try:
+        # Calculate rotation angle from transformation matrix
+        angle = np.arctan2(M[1, 0], M[0, 0]) * 180 / np.pi
+    except:
+        angle = 0
 
     # Rotate the image to correct the rotation
     rotated_image = rotate_image(img, -angle)
