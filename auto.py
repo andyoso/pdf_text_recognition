@@ -219,6 +219,7 @@ link_df['ent_or_rep'] = link_df['link'].apply(lambda x: x.split(".pdf")[0].split
                                               else x.split(".tif")[0].split("-")[1] if "-" in x and x.lower().endswith(".tif")
                                               else x.split(".tiff")[0].split("-")[1] if "-" in x and x.lower().endswith(".tiff")
                                               else None)
+link_df['ent_or_rep'] = link_df['ent_or_rep'].str[0]
 link_df['file'] = link_df['link'].apply(
     lambda x: x.split("/")[1] if "/" in x else None)
 
